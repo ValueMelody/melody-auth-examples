@@ -1,0 +1,17 @@
+dist/
+node_modules/
+.wrangler
+.next/
+.expo
+expo-env.d.ts
+next-env.d.ts
+.open-next
+.angular/
+.dev.vars
+.env
+.env.local
+*.pem
+node_session_secret
+coverage/
+tsconfig.tsbuildinfo
+.DS_Store
