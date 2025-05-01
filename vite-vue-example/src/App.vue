@@ -10,6 +10,7 @@ const {
   isAuthenticated,
   acquireUserInfo,
   acquireToken,
+  idToken,
   isAuthenticating,
   account,
   userInfo,
@@ -35,6 +36,7 @@ const {
       <p>Is Authenticating: {{ isAuthenticating }}</p>
       <p>Access Token: {{ accessToken }}</p>
       <p>Refresh Token: {{ refreshToken }}</p>
+      <p>Id Token: {{ idToken }}</p>
       <p>Account: {{ account }}</p>
       <p>User Info: {{ userInfo }}</p>
       <p>Is Loading Token: {{ isLoadingToken }}</p>

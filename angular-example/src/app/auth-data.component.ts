@@ -10,6 +10,7 @@ import { AuthService } from '@melody-auth/angular'
       <p>Is Authenticating: {{ auth.isAuthenticating }}</p>
       <p>Access Token: {{ auth.accessToken }}</p>
       <p>Refresh Token: {{ auth.refreshToken }}</p>
+      <p>Id Token: {{ auth.idToken }}</p>
       <p>Account: {{ auth.account | json }}</p>
       <p>User Info: {{ auth.userInfo | json }}</p>
       <p>Is Loading Token: {{ auth.isLoadingToken }}</p>
