@@ -17,9 +17,17 @@ import {
   usePostEmbeddedAuthV1TokenExchangeMutation,
   usePostEmbeddedAuthV1TokenRefreshMutation,
   usePostEmbeddedAuthV1SignOutMutation,
-  usePostEmbeddedAuthV1ResetPasswordCodeMutation
+  useGetEmbeddedAuthV1BySessionIdPasskeyEnrollQuery,
+  usePostEmbeddedAuthV1BySessionIdPasskeyEnrollMutation,
+  usePostEmbeddedAuthV1BySessionIdPasskeyEnrollDeclineMutation,
+  usePostEmbeddedAuthV1ResetPasswordCodeMutation,
+  useGetEmbeddedAuthV1BySessionIdRecoveryCodeEnrollQuery,
+  usePostEmbeddedAuthV1BySessionIdRecoveryCodeMutation,
+  useLazyGetEmbeddedAuthV1BySessionIdPasskeyVerifyQuery,
+  usePostEmbeddedAuthV1BySessionIdPasskeyVerifyMutation,
 } from "./services/embedded-auth/api"
 import { genRandomString, genCodeChallenge } from "@melody-auth/shared"
+import { startAuthentication, startRegistration } from "@simplewebauthn/browser"
 
 const CLIENT_ID = '1A3564de462142A60cE5456edaADB5659dBC1B9c719c9E558dcaac0850a2f8F8'
 
@@ -35,22 +43,27 @@ function Root() {
     'emailMfa' |
     'otpSetup' |
     'otpMfa' |
-    'smsMfa'
+    'smsMfa' |
+    'passkeyEnroll' |
+    'recoveryCodeEnroll'
   >('initiate')
   const [sessionId, setSessionId] = useState('')
   const [idToken, setIdToken] = useState('')
   const [accessToken, setAccessToken] = useState('')
   const [refreshToken, setRefreshToken] = useState('')
   const [email, setEmail] = useState('')
+  const [recoveryCode, setRecoveryCode] = useState('')
   const [password, setPassword] = useState('')
   const [emailMfaCode, setEmailMfaCode] = useState('')
   const [otpMfaCode, setOtpMfaCode] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [smsMfaCode, setSmsMfaCode] = useState('')
   const [hasSetPhoneNumber, setHasSetPhoneNumber] = useState(false)
+  const [rememberDeclinePasskeyEnroll, setRememberDeclinePasskeyEnroll] = useState(false)
 
   const [initiate] = usePostEmbeddedAuthV1InitiateMutation()
   const [signIn] =  usePostEmbeddedAuthV1BySessionIdSignInMutation()
+  const [signInWithRecoveryCode] = usePostEmbeddedAuthV1BySessionIdRecoveryCodeMutation()
   const [signUp] =  usePostEmbeddedAuthV1BySessionIdSignUpMutation()
   const [consent] =  usePostEmbeddedAuthV1BySessionIdAppConsentMutation()
   const [enrollMfa] = usePostEmbeddedAuthV1BySessionIdMfaEnrollmentMutation()
@@ -63,6 +76,11 @@ function Root() {
   const [verifyOtpMfa] = usePostEmbeddedAuthV1BySessionIdOtpMfaMutation()
   const [sendSmsSetup] = usePostEmbeddedAuthV1BySessionIdSmsMfaSetupMutation()
   const [verifySmsMfa] = usePostEmbeddedAuthV1BySessionIdSmsMfaMutation()
+  const [enrollPasskey] = usePostEmbeddedAuthV1BySessionIdPasskeyEnrollMutation()
+  const [declinePasskeyEnroll] = usePostEmbeddedAuthV1BySessionIdPasskeyEnrollDeclineMutation()
+  const [verifyPasskey] = usePostEmbeddedAuthV1BySessionIdPasskeyVerifyMutation()
+
+  const [getPasskeyInfo, { data: passkeyInfo }] = useLazyGetEmbeddedAuthV1BySessionIdPasskeyVerifyQuery()
 
   const { data: consentInfo } =  useGetEmbeddedAuthV1BySessionIdAppConsentQuery({
     sessionId,
@@ -86,6 +104,18 @@ function Root() {
     sessionId,
   },{
     skip: step !== 'smsMfa',
+  })
+
+  const { data: passkeyEnrollInfo } = useGetEmbeddedAuthV1BySessionIdPasskeyEnrollQuery({
+    sessionId,
+  },{
+    skip: step !== 'passkeyEnroll',
+  })
+
+  const { data: recoveryCodeEnrollInfo } = useGetEmbeddedAuthV1BySessionIdRecoveryCodeEnrollQuery({
+    sessionId,
+  },{
+    skip: step !== 'recoveryCodeEnroll',
   })
 
   const handleInitiate = useCallback(async () => {
@@ -141,6 +171,42 @@ function Root() {
       postSignInReq: {
         email,
         password,
+      },
+    })
+
+    handleNextStep(res.data?.nextStep ?? '')
+  }
+
+  const handleLoadPasskeyInfo = async () => {
+    await getPasskeyInfo({
+      email,
+      sessionId
+    })
+  }
+
+  const handleVerifyPasskey = async () => {
+    if (!passkeyInfo?.passkeyOption) return
+
+    startAuthentication({ optionsJSON: passkeyInfo.passkeyOption })
+      .then((res) => {
+        verifyPasskey({
+          sessionId,
+          postPasskeyVerifyReq: {
+            email,
+            passkeyInfo: res,
+          },
+        }).then((res) => {
+          handleNextStep(res.data?.nextStep ?? '')
+        })
+      })
+  }
+
+  const handleRecoveryCodeSignIn = async () => {
+    const res = await signInWithRecoveryCode({
+      sessionId,
+      postSignInWithRecoveryCodeReq: {
+        email,
+        recoveryCode,
       },
     })
 
@@ -232,6 +298,36 @@ function Root() {
     handleNextStep(res.data?.nextStep ?? '')
   }
 
+  const handleEnrollPasskey = async () => {
+    if (!passkeyEnrollInfo?.enrollOptions) return
+    startRegistration({ optionsJSON: passkeyEnrollInfo.enrollOptions })
+      .then((enrollInfo) => {
+        enrollPasskey({
+          sessionId,
+          postPasskeyEnrollReq: {
+            enrollInfo,
+          },
+        }).then((res) => {
+          handleNextStep(res.data?.nextStep ?? '')
+        })
+      })
+  }
+
+  const handleDeclinePasskeyEnroll = async () => {
+    await declinePasskeyEnroll({
+      sessionId,
+      postPasskeyEnrollDeclineReq: {
+        remember: rememberDeclinePasskeyEnroll,
+      },
+    }).then((res) => {
+      handleNextStep(res.data?.nextStep ?? '')
+    })
+  }
+
+  const handleContinueFromRecoveryCodeEnroll = async () => {
+    handleNextStep('tokenExchange')
+  }
+
   const handleSignOut = async () => {
     const res = await signOut({
       signOutReq: {
@@ -274,6 +370,12 @@ function Root() {
       case 'sms_mfa':
         setStep('smsMfa')
         break
+      case 'passkey_enroll':
+        setStep('passkeyEnroll')
+        break
+      case 'recovery_code_enroll':
+        setStep('recoveryCodeEnroll')
+        break
       default:
         setStep('tokenExchange')
     }
@@ -287,7 +389,23 @@ function Root() {
           <h2>Sign In</h2>
           <input type="text" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <button type="button" onClick={handleSignIn}>Sign In</button>
+          <button type="button" onClick={handleSignIn} style={{ marginBottom: '20px' }}>Sign In</button>
+
+          <input type="text" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input type="text" placeholder="recovery code" value={recoveryCode} onChange={(e) => setRecoveryCode(e.target.value)} />
+          <button type="button" onClick={handleRecoveryCodeSignIn}>Recovery Code Sign In</button>
+
+          <input type="text" style={{ marginTop: '20px' }} placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          {!passkeyInfo && (
+            <button type="button" onClick={handleLoadPasskeyInfo}>Load Passkey Info</button>
+          )}
+          {passkeyInfo && !passkeyInfo.passkeyOption && (
+            <p>No passkey found</p>
+          )}
+          {passkeyInfo && passkeyInfo.passkeyOption && (
+            <button type="button" onClick={handleVerifyPasskey}>Sign in with passkey</button>
+          )}
+
           <button type="button" onClick={() => setStep('signUp')} style={{ marginTop: '20px' }}>Sign Up</button>
           <button type="button" onClick={handleResetPassword} style={{ marginTop: '20px' }}>Reset Password</button>
         </section>
@@ -364,6 +482,28 @@ function Root() {
                 <button type="button" onClick={handleSendSmsSetup}>Send</button>
               </>
             )}
+          </section>
+        )
+      }
+      {
+        step === 'passkeyEnroll' && (
+          <section style={{ display: 'flex', flexDirection: 'column', width: '300px' }}>
+            <h2>Passkey Enrollment</h2>
+            <button type="button" onClick={handleEnrollPasskey}>Enroll</button>
+            <div>
+              <input type="checkbox" checked={rememberDeclinePasskeyEnroll} onChange={() => setRememberDeclinePasskeyEnroll(!rememberDeclinePasskeyEnroll)} />
+              <label>Decline forever</label>
+            </div>
+            <button type="button" onClick={handleDeclinePasskeyEnroll}>Decline</button>
+          </section>
+        )
+      }
+      {
+        step === 'recoveryCodeEnroll' && (
+          <section style={{ display: 'flex', flexDirection: 'column', width: '300px' }}>
+            <h2>Save your recovery code</h2>
+            <p>{recoveryCodeEnrollInfo?.recoveryCode}</p>
+            <button type="button" onClick={handleContinueFromRecoveryCodeEnroll}>Continue</button>
           </section>
         )
       }

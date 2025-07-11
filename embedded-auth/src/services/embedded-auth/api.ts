@@ -17,6 +17,15 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Embedded Auth"],
       }),
+      getEmbeddedAuthV1BySessionIdSignUp: build.query<
+        GetEmbeddedAuthV1BySessionIdSignUpApiResponse,
+        GetEmbeddedAuthV1BySessionIdSignUpApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/sign-up`,
+        }),
+        providesTags: ["Embedded Auth"],
+      }),
       postEmbeddedAuthV1BySessionIdSignUp: build.mutation<
         PostEmbeddedAuthV1BySessionIdSignUpApiResponse,
         PostEmbeddedAuthV1BySessionIdSignUpApiArg
@@ -169,6 +178,80 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Embedded Auth"],
       }),
+      getEmbeddedAuthV1BySessionIdPasskeyEnroll: build.query<
+        GetEmbeddedAuthV1BySessionIdPasskeyEnrollApiResponse,
+        GetEmbeddedAuthV1BySessionIdPasskeyEnrollApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/passkey-enroll`,
+        }),
+        providesTags: ["Embedded Auth"],
+      }),
+      postEmbeddedAuthV1BySessionIdPasskeyEnroll: build.mutation<
+        PostEmbeddedAuthV1BySessionIdPasskeyEnrollApiResponse,
+        PostEmbeddedAuthV1BySessionIdPasskeyEnrollApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/passkey-enroll`,
+          method: "POST",
+          body: queryArg.postPasskeyEnrollReq,
+        }),
+        invalidatesTags: ["Embedded Auth"],
+      }),
+      postEmbeddedAuthV1BySessionIdPasskeyEnrollDecline: build.mutation<
+        PostEmbeddedAuthV1BySessionIdPasskeyEnrollDeclineApiResponse,
+        PostEmbeddedAuthV1BySessionIdPasskeyEnrollDeclineApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/passkey-enroll-decline`,
+          method: "POST",
+          body: queryArg.postPasskeyEnrollDeclineReq,
+        }),
+        invalidatesTags: ["Embedded Auth"],
+      }),
+      getEmbeddedAuthV1BySessionIdPasskeyVerify: build.query<
+        GetEmbeddedAuthV1BySessionIdPasskeyVerifyApiResponse,
+        GetEmbeddedAuthV1BySessionIdPasskeyVerifyApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/passkey-verify`,
+          params: {
+            email: queryArg.email,
+          },
+        }),
+        providesTags: ["Embedded Auth"],
+      }),
+      postEmbeddedAuthV1BySessionIdPasskeyVerify: build.mutation<
+        PostEmbeddedAuthV1BySessionIdPasskeyVerifyApiResponse,
+        PostEmbeddedAuthV1BySessionIdPasskeyVerifyApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/passkey-verify`,
+          method: "POST",
+          body: queryArg.postPasskeyVerifyReq,
+        }),
+        invalidatesTags: ["Embedded Auth"],
+      }),
+      getEmbeddedAuthV1BySessionIdRecoveryCodeEnroll: build.query<
+        GetEmbeddedAuthV1BySessionIdRecoveryCodeEnrollApiResponse,
+        GetEmbeddedAuthV1BySessionIdRecoveryCodeEnrollApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/recovery-code-enroll`,
+        }),
+        providesTags: ["Embedded Auth"],
+      }),
+      postEmbeddedAuthV1BySessionIdRecoveryCode: build.mutation<
+        PostEmbeddedAuthV1BySessionIdRecoveryCodeApiResponse,
+        PostEmbeddedAuthV1BySessionIdRecoveryCodeApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/recovery-code`,
+          method: "POST",
+          body: queryArg.postSignInWithRecoveryCodeReq,
+        }),
+        invalidatesTags: ["Embedded Auth"],
+      }),
       postEmbeddedAuthV1TokenExchange: build.mutation<
         PostEmbeddedAuthV1TokenExchangeApiResponse,
         PostEmbeddedAuthV1TokenExchangeApiArg
@@ -223,6 +306,11 @@ export type PostEmbeddedAuthV1InitiateApiResponse =
   };
 export type PostEmbeddedAuthV1InitiateApiArg = {
   postInitiateReq: PostInitiateReq;
+};
+export type GetEmbeddedAuthV1BySessionIdSignUpApiResponse =
+  /** status 200 Sign up info */ GetSignUpInfoRes;
+export type GetEmbeddedAuthV1BySessionIdSignUpApiArg = {
+  sessionId: string;
 };
 export type PostEmbeddedAuthV1BySessionIdSignUpApiResponse =
   /** status 200 Next step of the auth flow */ AuthRes;
@@ -303,6 +391,46 @@ export type PostEmbeddedAuthV1BySessionIdSmsMfaCodeApiResponse = unknown;
 export type PostEmbeddedAuthV1BySessionIdSmsMfaCodeApiArg = {
   sessionId: string;
 };
+export type GetEmbeddedAuthV1BySessionIdPasskeyEnrollApiResponse =
+  /** status 200 the passkey enroll options */ PasskeyEnrollInfoRes;
+export type GetEmbeddedAuthV1BySessionIdPasskeyEnrollApiArg = {
+  sessionId: string;
+};
+export type PostEmbeddedAuthV1BySessionIdPasskeyEnrollApiResponse =
+  /** status 200 Next step of the auth flow */ AuthRes;
+export type PostEmbeddedAuthV1BySessionIdPasskeyEnrollApiArg = {
+  sessionId: string;
+  postPasskeyEnrollReq: PostPasskeyEnrollReq;
+};
+export type PostEmbeddedAuthV1BySessionIdPasskeyEnrollDeclineApiResponse =
+  /** status 200 Next step of the auth flow */ AuthRes;
+export type PostEmbeddedAuthV1BySessionIdPasskeyEnrollDeclineApiArg = {
+  sessionId: string;
+  postPasskeyEnrollDeclineReq: PostPasskeyEnrollDeclineReq;
+};
+export type GetEmbeddedAuthV1BySessionIdPasskeyVerifyApiResponse =
+  /** status 200 the passkey verify options */ PasskeyVerifyInfoRes;
+export type GetEmbeddedAuthV1BySessionIdPasskeyVerifyApiArg = {
+  sessionId: string;
+  email: string;
+};
+export type PostEmbeddedAuthV1BySessionIdPasskeyVerifyApiResponse =
+  /** status 200 Next step of the auth flow */ AuthRes;
+export type PostEmbeddedAuthV1BySessionIdPasskeyVerifyApiArg = {
+  sessionId: string;
+  postPasskeyVerifyReq: PostPasskeyVerifyReq;
+};
+export type GetEmbeddedAuthV1BySessionIdRecoveryCodeEnrollApiResponse =
+  /** status 200 the recovery code */ RecoveryCodeEnrollRes;
+export type GetEmbeddedAuthV1BySessionIdRecoveryCodeEnrollApiArg = {
+  sessionId: string;
+};
+export type PostEmbeddedAuthV1BySessionIdRecoveryCodeApiResponse =
+  /** status 200 Next step of the auth flow */ AuthRes;
+export type PostEmbeddedAuthV1BySessionIdRecoveryCodeApiArg = {
+  sessionId: string;
+  postSignInWithRecoveryCodeReq: PostSignInWithRecoveryCodeReq;
+};
 export type PostEmbeddedAuthV1TokenExchangeApiResponse =
   /** status 200 Access token, refresh token, id token */ TokenExchangeRes;
 export type PostEmbeddedAuthV1TokenExchangeApiArg = {
@@ -330,6 +458,19 @@ export type PostInitiateReq = {
   locale: string;
   org?: string;
 };
+export type GetSignUpInfoRes = {
+  userAttributes: {
+    id?: number;
+    name?: string;
+    includeInSignUpForm?: boolean;
+    requiredInSignUpForm?: boolean;
+    includeInIdTokenBody?: boolean;
+    includeInUserInfo?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+    deletedAt?: string | null;
+  }[];
+};
 export type AuthRes = {
   sessionId: string;
   nextStep?:
@@ -347,6 +488,9 @@ export type PostSignUpReq = {
   password: string;
   firstName?: string;
   lastName?: string;
+  attributes?: {
+    [key: string]: string;
+  };
 };
 export type PostSignInReq = {
   email: string;
@@ -359,7 +503,7 @@ export type GetAppConsentRes = {
     note?: string;
     createdAt?: string;
     updatedAt?: string;
-    deletedAt?: string;
+    deletedAt?: string | null;
     locales?: {
       id?: number;
       scopeId?: number;
@@ -367,7 +511,7 @@ export type GetAppConsentRes = {
       value?: string;
       createdAt?: string;
       updatedAt?: string;
-      deletedAt?: string;
+      deletedAt?: string | null;
     }[];
   }[];
   appName: string;
@@ -395,6 +539,208 @@ export type SmsMfaConfigRes = {
   allowFallbackToEmailMfa: boolean;
   countryCode: string;
   phoneNumber: string;
+};
+export type PasskeyEnrollInfoRes = {
+  /** PublicKeyCredentialCreationOptions suitable for JSON transmission to navigator.credentials.create() */
+  enrollOptions: {
+    /** Relying Party entity */
+    rp: {
+      name: string;
+      id?: string;
+    };
+    /** User entity JSON */
+    user: {
+      id: string;
+      name: string;
+      displayName: string;
+    };
+    /** Base64URL-encoded challenge */
+    challenge: string;
+    /** Public key credential parameters */
+    pubKeyCredParams: {
+      type: "public-key";
+      /** COSE algorithm identifier */
+      alg: number;
+    }[];
+    /** Milliseconds to wait for completion */
+    timeout?: number;
+    /** Credentials to exclude */
+    excludeCredentials?: {
+      id: string;
+      type: "public-key";
+      transports?: (
+        | "ble"
+        | "cable"
+        | "hybrid"
+        | "internal"
+        | "nfc"
+        | "smart-card"
+        | "usb"
+      )[];
+    }[];
+    /** Authenticator selection criteria */
+    authenticatorSelection?: {
+      authenticatorAttachment?: "platform" | "cross-platform";
+      requireResidentKey?: boolean;
+      residentKey?: "discouraged" | "preferred" | "required";
+      userVerification?: "discouraged" | "preferred" | "required";
+    };
+    /** Credential UX hints */
+    hints?: ("hybrid" | "security-key" | "client-device")[];
+    /** Attestation conveyance preference */
+    attestation?: "direct" | "enterprise" | "indirect" | "none";
+    /** Supported attestation formats */
+    attestationFormats?: (
+      | "fido-u2f"
+      | "packed"
+      | "android-safetynet"
+      | "android-key"
+      | "tpm"
+      | "apple"
+      | "none"
+    )[];
+    /** Authentication extensions inputs */
+    extensions?: {
+      appid?: string;
+      credProps?: boolean;
+      hmacCreateSecret?: boolean;
+      minPinLength?: boolean;
+    };
+  };
+};
+export type PostPasskeyEnrollReq = {
+  /** Registration response JSON from navigator.credentials.create(), with all ArrayBuffers Base64URL-encoded */
+  enrollInfo: {
+    /** Base64URL-encoded credential ID */
+    id: string;
+    /** Base64URL-encoded raw credential ID */
+    rawId: string;
+    /** Authenticator attestation response, with all binary fields Base64URL-encoded */
+    response: {
+      /** Base64URL-encoded JSON of the clientData */
+      clientDataJSON: string;
+      /** Base64URL-encoded CBOR attestation object */
+      attestationObject: string;
+      /** Base64URL-encoded authenticatorData (optional) */
+      authenticatorData?: string;
+      /** Supported authenticator transports (optional) */
+      transports?: (
+        | "ble"
+        | "cable"
+        | "hybrid"
+        | "internal"
+        | "nfc"
+        | "smart-card"
+        | "usb"
+      )[];
+      /** COSE algorithm identifier (optional) */
+      publicKeyAlgorithm?: number;
+      /** Base64URL-encoded raw public key (optional) */
+      publicKey?: string;
+    };
+    /** Where the credential is stored (optional) */
+    authenticatorAttachment?: "platform" | "cross-platform";
+    /** Results of any client-side extensions */
+    clientExtensionResults: {
+      /** appid extension result (optional) */
+      appid?: boolean;
+      /** credProps extension result (optional) */
+      credProps?: {
+        /** Whether the credential is resident-key capable */
+        rk?: boolean;
+      };
+      /** hmacCreateSecret extension result (optional) */
+      hmacCreateSecret?: boolean;
+    };
+    /** Credential type */
+    type: "public-key";
+  };
+};
+export type PostPasskeyEnrollDeclineReq = {
+  remember: boolean;
+};
+export type PasskeyVerifyInfoRes = {
+  /** A variant of PublicKeyCredentialRequestOptions suitable for JSON transmission to the browser to be passed into navigator.credentials.get(). */
+  passkeyOption: {
+    /** Base64URL-encoded challenge */
+    challenge: string;
+    /** Milliseconds the caller is willing to wait for the call to complete */
+    timeout?: number;
+    /** Relying Party identifier */
+    rpId?: string;
+    /** List of credential descriptors that are allowed for assertion */
+    allowCredentials?: {
+      /** Base64URL-encoded credential ID */
+      id: string;
+      /** Credential type */
+      type: "public-key";
+      /** Allowed authenticator transports */
+      transports?: (
+        | "ble"
+        | "cable"
+        | "hybrid"
+        | "internal"
+        | "nfc"
+        | "smart-card"
+        | "usb"
+      )[];
+    }[];
+    /** User verification requirement */
+    userVerification?: "discouraged" | "preferred" | "required";
+    /** Hints to guide the browser’s authenticator UX */
+    hints?: ("hybrid" | "security-key" | "client-device")[];
+    /** Authentication extension inputs */
+    extensions?: {
+      appid?: string;
+      credProps?: boolean;
+      hmacCreateSecret?: boolean;
+      minPinLength?: boolean;
+    };
+  } | null;
+};
+export type PostPasskeyVerifyReq = {
+  /** Authentication response JSON from navigator.credentials.get(), with all ArrayBuffers Base64URL-encoded */
+  passkeyInfo: {
+    /** Base64URL-encoded credential ID */
+    id: string;
+    /** Base64URL-encoded raw credential ID */
+    rawId: string;
+    /** Authenticator assertion response, with all binary fields Base64URL-encoded */
+    response: {
+      /** Base64URL-encoded JSON of the clientData */
+      clientDataJSON: string;
+      /** Base64URL-encoded authenticatorData */
+      authenticatorData: string;
+      /** Base64URL-encoded assertion signature */
+      signature: string;
+      /** Base64URL-encoded user handle (optional) */
+      userHandle?: string;
+    };
+    /** Where the credential is stored (optional) */
+    authenticatorAttachment?: "platform" | "cross-platform";
+    /** Results of any client-side extensions */
+    clientExtensionResults: {
+      /** appid extension result (optional) */
+      appid?: boolean;
+      /** credProps extension result (optional) */
+      credProps?: {
+        /** Whether the credential is resident-key capable */
+        rk?: boolean;
+      };
+      /** hmacCreateSecret extension result (optional) */
+      hmacCreateSecret?: boolean;
+    };
+    /** Credential type */
+    type: "public-key";
+  };
+  email: string;
+};
+export type RecoveryCodeEnrollRes = {
+  recoveryCode: string;
+};
+export type PostSignInWithRecoveryCodeReq = {
+  email?: string;
+  recoveryCode: string;
 };
 export type TokenExchangeRes = {
   access_token: string;
@@ -431,6 +777,8 @@ export type ResetPasswordReq = {
 };
 export const {
   usePostEmbeddedAuthV1InitiateMutation,
+  useGetEmbeddedAuthV1BySessionIdSignUpQuery,
+  useLazyGetEmbeddedAuthV1BySessionIdSignUpQuery,
   usePostEmbeddedAuthV1BySessionIdSignUpMutation,
   usePostEmbeddedAuthV1BySessionIdSignInMutation,
   useGetEmbeddedAuthV1BySessionIdAppConsentQuery,
@@ -451,6 +799,16 @@ export const {
   useLazyGetEmbeddedAuthV1BySessionIdSmsMfaQuery,
   usePostEmbeddedAuthV1BySessionIdSmsMfaMutation,
   usePostEmbeddedAuthV1BySessionIdSmsMfaCodeMutation,
+  useGetEmbeddedAuthV1BySessionIdPasskeyEnrollQuery,
+  useLazyGetEmbeddedAuthV1BySessionIdPasskeyEnrollQuery,
+  usePostEmbeddedAuthV1BySessionIdPasskeyEnrollMutation,
+  usePostEmbeddedAuthV1BySessionIdPasskeyEnrollDeclineMutation,
+  useGetEmbeddedAuthV1BySessionIdPasskeyVerifyQuery,
+  useLazyGetEmbeddedAuthV1BySessionIdPasskeyVerifyQuery,
+  usePostEmbeddedAuthV1BySessionIdPasskeyVerifyMutation,
+  useGetEmbeddedAuthV1BySessionIdRecoveryCodeEnrollQuery,
+  useLazyGetEmbeddedAuthV1BySessionIdRecoveryCodeEnrollQuery,
+  usePostEmbeddedAuthV1BySessionIdRecoveryCodeMutation,
   usePostEmbeddedAuthV1TokenExchangeMutation,
   usePostEmbeddedAuthV1TokenRefreshMutation,
   usePostEmbeddedAuthV1SignOutMutation,
