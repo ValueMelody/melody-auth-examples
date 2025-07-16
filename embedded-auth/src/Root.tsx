@@ -364,7 +364,7 @@ function Root() {
       case 'otp_setup':
         setStep('otpSetup')
         break
-      case 'opt_mfa':
+      case 'otp_mfa':
         setStep('otpMfa')
         break
       case 'sms_mfa':
