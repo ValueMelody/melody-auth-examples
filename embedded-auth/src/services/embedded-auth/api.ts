@@ -252,6 +252,35 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Embedded Auth"],
       }),
+      getEmbeddedAuthV1BySessionIdSwitchOrg: build.query<
+        GetEmbeddedAuthV1BySessionIdSwitchOrgApiResponse,
+        GetEmbeddedAuthV1BySessionIdSwitchOrgApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/switch-org`,
+        }),
+        providesTags: ["Embedded Auth"],
+      }),
+      postEmbeddedAuthV1BySessionIdSwitchOrg: build.mutation<
+        PostEmbeddedAuthV1BySessionIdSwitchOrgApiResponse,
+        PostEmbeddedAuthV1BySessionIdSwitchOrgApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/switch-org`,
+          method: "POST",
+          body: queryArg.postProcessSwitchOrgReq,
+        }),
+        invalidatesTags: ["Embedded Auth"],
+      }),
+      getEmbeddedAuthV1BySessionIdAppBanners: build.query<
+        GetEmbeddedAuthV1BySessionIdAppBannersApiResponse,
+        GetEmbeddedAuthV1BySessionIdAppBannersApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/embedded-auth/v1/${queryArg.sessionId}/app-banners`,
+        }),
+        providesTags: ["Embedded Auth"],
+      }),
       postEmbeddedAuthV1TokenExchange: build.mutation<
         PostEmbeddedAuthV1TokenExchangeApiResponse,
         PostEmbeddedAuthV1TokenExchangeApiArg
@@ -431,6 +460,22 @@ export type PostEmbeddedAuthV1BySessionIdRecoveryCodeApiArg = {
   sessionId: string;
   postSignInWithRecoveryCodeReq: PostSignInWithRecoveryCodeReq;
 };
+export type GetEmbeddedAuthV1BySessionIdSwitchOrgApiResponse =
+  /** status 200 User orgs */ UserOrgsRes;
+export type GetEmbeddedAuthV1BySessionIdSwitchOrgApiArg = {
+  sessionId: string;
+};
+export type PostEmbeddedAuthV1BySessionIdSwitchOrgApiResponse =
+  /** status 200 Next step of the auth flow */ AuthRes;
+export type PostEmbeddedAuthV1BySessionIdSwitchOrgApiArg = {
+  sessionId: string;
+  postProcessSwitchOrgReq: PostProcessSwitchOrgReq;
+};
+export type GetEmbeddedAuthV1BySessionIdAppBannersApiResponse =
+  /** status 200 the app banners */ AppBannersRes;
+export type GetEmbeddedAuthV1BySessionIdAppBannersApiArg = {
+  sessionId: string;
+};
 export type PostEmbeddedAuthV1TokenExchangeApiResponse =
   /** status 200 Access token, refresh token, id token */ TokenExchangeRes;
 export type PostEmbeddedAuthV1TokenExchangeApiArg = {
@@ -479,7 +524,7 @@ export type AuthRes = {
     | "email_mfa"
     | "sms_mfa"
     | "otp_setup"
-    | "opt_mfa"
+    | "otp_mfa"
     | "passkey_enroll";
   success: boolean;
 };
@@ -524,6 +569,7 @@ export type PostMfaEnrollmentReq = {
 };
 export type MfaCodeReq = {
   mfaCode: string;
+  rememberDevice?: boolean;
 };
 export type OtpMfaSetupRes = {
   otpUri: string;
@@ -733,7 +779,8 @@ export type PostPasskeyVerifyReq = {
     /** Credential type */
     type: "public-key";
   };
-  email: string;
+  /** The challenge value read from the response of Get passkey verify options */
+  challenge: string;
 };
 export type RecoveryCodeEnrollRes = {
   recoveryCode: string;
@@ -741,6 +788,34 @@ export type RecoveryCodeEnrollRes = {
 export type PostSignInWithRecoveryCodeReq = {
   email?: string;
   recoveryCode: string;
+};
+export type UserOrgsRes = {
+  orgs: {
+    id?: number;
+    name?: string;
+    slug?: string;
+    companyLogoUrl?: string;
+  }[];
+  activeOrgSlug: string;
+};
+export type PostProcessSwitchOrgReq = {
+  org: string;
+};
+export type Banner = {
+  id: number;
+  type: string;
+  text: string;
+  isActive: boolean;
+  locales: {
+    locale: string;
+    value: string;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+export type AppBannersRes = {
+  banners: Banner[];
 };
 export type TokenExchangeRes = {
   access_token: string;
@@ -809,6 +884,11 @@ export const {
   useGetEmbeddedAuthV1BySessionIdRecoveryCodeEnrollQuery,
   useLazyGetEmbeddedAuthV1BySessionIdRecoveryCodeEnrollQuery,
   usePostEmbeddedAuthV1BySessionIdRecoveryCodeMutation,
+  useGetEmbeddedAuthV1BySessionIdSwitchOrgQuery,
+  useLazyGetEmbeddedAuthV1BySessionIdSwitchOrgQuery,
+  usePostEmbeddedAuthV1BySessionIdSwitchOrgMutation,
+  useGetEmbeddedAuthV1BySessionIdAppBannersQuery,
+  useLazyGetEmbeddedAuthV1BySessionIdAppBannersQuery,
   usePostEmbeddedAuthV1TokenExchangeMutation,
   usePostEmbeddedAuthV1TokenRefreshMutation,
   usePostEmbeddedAuthV1SignOutMutation,

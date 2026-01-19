@@ -29,7 +29,7 @@ import {
 import { genRandomString, genCodeChallenge } from "@melody-auth/shared"
 import { startAuthentication, startRegistration } from "@simplewebauthn/browser"
 
-const CLIENT_ID = '1A3564de462142A60cE5456edaADB5659dBC1B9c719c9E558dcaac0850a2f8F8'
+const CLIENT_ID = '3aDCB32a6E4aee15c46672A23FE11326a26fC3F5c0EBC7ca43ba87CD34865dE5'
 
 function Root() {
   const [codeVerifier, setCodeVerifier] = useState('')
@@ -80,7 +80,7 @@ function Root() {
   const [declinePasskeyEnroll] = usePostEmbeddedAuthV1BySessionIdPasskeyEnrollDeclineMutation()
   const [verifyPasskey] = usePostEmbeddedAuthV1BySessionIdPasskeyVerifyMutation()
 
-  const [getPasskeyInfo, { data: passkeyInfo }] = useLazyGetEmbeddedAuthV1BySessionIdPasskeyVerifyQuery()
+  const [getPasskeyInfo] = useLazyGetEmbeddedAuthV1BySessionIdPasskeyVerifyQuery()
 
   const { data: consentInfo } =  useGetEmbeddedAuthV1BySessionIdAppConsentQuery({
     sessionId,
@@ -177,22 +177,16 @@ function Root() {
     handleNextStep(res.data?.nextStep ?? '')
   }
 
-  const handleLoadPasskeyInfo = async () => {
-    await getPasskeyInfo({
-      email,
+  const handleLoginWithPasskey = async () => {
+    const passkeyInfoRes = await getPasskeyInfo({
       sessionId
     })
-  }
-
-  const handleVerifyPasskey = async () => {
-    if (!passkeyInfo?.passkeyOption) return
-
-    startAuthentication({ optionsJSON: passkeyInfo.passkeyOption })
+    startAuthentication({ optionsJSON: passkeyInfoRes.data?.passkeyOption ?? '' })
       .then((res) => {
         verifyPasskey({
           sessionId,
           postPasskeyVerifyReq: {
-            email,
+            challenge: passkeyInfoRes.data?.passkeyOption?.challenge ?? '',
             passkeyInfo: res,
           },
         }).then((res) => {
@@ -200,6 +194,7 @@ function Root() {
         })
       })
   }
+
 
   const handleRecoveryCodeSignIn = async () => {
     const res = await signInWithRecoveryCode({
@@ -395,16 +390,7 @@ function Root() {
           <input type="text" placeholder="recovery code" value={recoveryCode} onChange={(e) => setRecoveryCode(e.target.value)} />
           <button type="button" onClick={handleRecoveryCodeSignIn}>Recovery Code Sign In</button>
 
-          <input type="text" style={{ marginTop: '20px' }} placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          {!passkeyInfo && (
-            <button type="button" onClick={handleLoadPasskeyInfo}>Load Passkey Info</button>
-          )}
-          {passkeyInfo && !passkeyInfo.passkeyOption && (
-            <p>No passkey found</p>
-          )}
-          {passkeyInfo && passkeyInfo.passkeyOption && (
-            <button type="button" onClick={handleVerifyPasskey}>Sign in with passkey</button>
-          )}
+          <button type="button" onClick={handleLoginWithPasskey} style={{ marginTop: '20px' }}>Login with Passkey</button>
 
           <button type="button" onClick={() => setStep('signUp')} style={{ marginTop: '20px' }}>Sign Up</button>
           <button type="button" onClick={handleResetPassword} style={{ marginTop: '20px' }}>Reset Password</button>
